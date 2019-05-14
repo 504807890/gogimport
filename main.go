@@ -71,7 +71,7 @@ func (st *Sorter) addfunNameComment() {
 		// 暂时只处理第一行,后续可以处理多行
 		for _, item := range d.Doc.List {
 			if !strings.HasPrefix(item.Text, "//") {
-				break
+				continue
 			}
 			if strings.HasPrefix(item.Text, "//"+d.Name.Name+" ") {
 				// 注释后面添加空格
