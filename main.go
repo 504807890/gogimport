@@ -68,12 +68,20 @@ func (st *Sorter) addfunNameComment() {
 		if d.Doc == nil {
 			continue
 		}
-		if d.Doc.List != nil {
-			if !strings.HasPrefix(d.Doc.List[0].Text, "// "+d.Name.Name+" ") {
+		// 暂时只处理第一行,后续可以处理多行
+		for _, item := range d.Doc.List {
+			if strings.HasPrefix(item.Text, "//"+d.Name.Name+" ") {
 				// 注释后面添加空格
-				d.Doc.List[0].Text = "// " + d.Name.Name + d.Doc.List[0].Text[2:]
+				item.Text = "// " + item.Text[len("//"):]
+			} else if strings.HasPrefix(item.Text, "// "+d.Name.Name+" ") {
+			} else if strings.HasPrefix(item.Text, "// "+d.Name.Name) {
+				item.Text = "// " + d.Name.Name + " " + item.Text[len("// "+d.Name.Name):]
+			} else if strings.HasPrefix(item.Text, "// ") {
+				item.Text = "// " + d.Name.Name + " " + item.Text[len("// "):]
+			} else {
+				item.Text = "// " + d.Name.Name + " " + item.Text[len("//"):]
 			}
-			return
+			break
 		}
 	}
 }
