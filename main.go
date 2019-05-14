@@ -47,11 +47,44 @@ func main() {
 		}
 
 		st.sortImports()
+		st.addSpaceInComment()
+		st.addfunNameComment()
 
 		err = st.Write(file)
 		if err != nil {
 			log.Printf("write error %s", err.Error())
 			continue
+		}
+	}
+}
+
+func (st *Sorter) addfunNameComment() {
+	for _, d := range st.f.Decls {
+		d, ok := d.(*ast.FuncDecl)
+		if !ok {
+			continue
+		}
+		// 没有日志的不处理
+		if d.Doc == nil {
+			continue
+		}
+		if d.Doc.List != nil {
+			if !strings.HasPrefix(d.Doc.List[0].Text, "// "+d.Name.Name+" ") {
+				// 注释后面添加空格
+				d.Doc.List[0].Text = "// " + d.Name.Name + d.Doc.List[0].Text[2:]
+			}
+			return
+		}
+	}
+}
+
+func (st *Sorter) addSpaceInComment() {
+	for _, c := range st.f.Comments {
+		for _, item := range c.List {
+			if len(item.Text) >= 3 && strings.HasPrefix(item.Text, "//") && !strings.HasPrefix(item.Text, "// ") {
+				// 注释后面添加空格
+				item.Text = "// " + item.Text[2:]
+			}
 		}
 	}
 }
