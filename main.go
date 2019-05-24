@@ -26,7 +26,6 @@ func main() {
 		log.Fatalln("local must set")
 	}
 	files := os.Args[3:]
-
 	for _, filename := range files {
 		st := &Sorter{
 			filename: filename,
@@ -45,7 +44,6 @@ func main() {
 			log.Printf("init error: %s", err.Error())
 			continue
 		}
-
 		st.sortImports()
 		st.addSpaceInComment()
 		st.addfunNameComment()
@@ -106,14 +104,15 @@ func (st *Sorter) sortImports() {
 		if !ok || d.Tok != token.IMPORT {
 			break
 		}
-
 		if !d.Lparen.IsValid() {
 			continue
 		}
 		cf := st.fset.File(st.f.Pos())
 		loffset := cf.Position(d.Lparen).Offset
 		roffset := cf.Position(d.Rparen).Offset
+		log.Printf("deleteLinesRange %v", st.lines)
 		st.lines = deleteLinesRange(st.lines, loffset, roffset)
+		log.Printf("deleteLinesRange %v", st.lines)
 		specs := d.Specs[:0]
 		specs = append(specs, st.sortSpecs(d.Specs[0:])...)
 		d.Specs = specs
@@ -280,6 +279,7 @@ func getLines(data []byte) ([]int, error) {
 	lines := []int{offset}
 	for rd.Scan() {
 		offset += len(rd.Bytes()) + 1
+		log.Printf("lines:%+v %+v", offset, string(rd.Bytes()))
 		lines = append(lines, offset)
 	}
 	return lines[:len(lines)-1], nil
